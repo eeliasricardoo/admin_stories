@@ -4,13 +4,13 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Plus, Trash2 } from "lucide-react"
+import { Search, PlusCircle, Trash2 } from "lucide-react"
 import { Select } from "@/components/ui/select"
 import { CreateStoryboardModal } from "./create-storyboard-modal"
 
 interface StoriesHeaderProps {
   filter: "all" | "published" | "draft"
-  onFilterChange: (filter: "all" | "published" | "draft") => void
+  onFilterChange: (value: "all" | "published" | "draft") => void
   onClearAll: () => void
   hasStories: boolean
 }
@@ -45,7 +45,7 @@ export function StoriesHeader({ filter, onFilterChange, onClearAll, hasStories }
         >
           <option value="all">Todos os status</option>
           <option value="published">Publicados</option>
-          <option value="draft">Despublicados</option>
+          <option value="draft">Rascunhos</option>
         </Select>
       </div>
 
@@ -68,12 +68,12 @@ export function StoriesHeader({ filter, onFilterChange, onClearAll, hasStories }
           className="gap-2"
           onClick={() => setShowCreateModal(true)}
         >
-          <Plus className="h-4 w-4" />
+          <PlusCircle className="h-4 w-4" />
           CRIAR STORYBOARD
         </Button>
       </div>
 
-      <CreateStoryboardModal 
+      <CreateStoryboardModal
         open={showCreateModal}
         onOpenChange={setShowCreateModal}
       />

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,13 +8,12 @@ import { Label } from "@/components/ui/label"
 import { ImageIcon } from "lucide-react"
 import { TagsInput, type Tag } from "@/components/ui/tags-input"
 
-interface CreateStoryboardModalProps {
+interface SettingsModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function CreateStoryboardModal({ open, onOpenChange }: CreateStoryboardModalProps) {
-  const router = useRouter()
+export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const [title, setTitle] = useState("")
   const [coverImage, setCoverImage] = useState<string | null>(null)
   const [showMediaOptions, setShowMediaOptions] = useState(false)
@@ -39,10 +37,8 @@ export function CreateStoryboardModal({ open, onOpenChange }: CreateStoryboardMo
 
   const handleSubmit = () => {
     if (!title.trim() || !coverImage) return
-
-    // Aqui você pode adicionar a lógica para salvar os dados iniciais
-    // Por enquanto, vamos apenas navegar para a página de criação
-    router.push("/admin_stories/create")
+    // Aqui você pode adicionar a lógica para salvar as configurações
+    onOpenChange(false)
   }
 
   const handleMediaSelect = (type: 'link' | 'file' | 'library') => {
@@ -56,7 +52,7 @@ export function CreateStoryboardModal({ open, onOpenChange }: CreateStoryboardMo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Criar novo storyboard</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">Configurações do Storyboard</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
@@ -142,7 +138,7 @@ export function CreateStoryboardModal({ open, onOpenChange }: CreateStoryboardMo
               onClick={handleSubmit}
               disabled={!title.trim() || !coverImage}
             >
-              Continuar
+              Salvar alterações
             </Button>
           </div>
         </div>
