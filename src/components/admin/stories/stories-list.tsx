@@ -63,14 +63,16 @@ const mockStories: Story[] = Array.from({ length: 12 }, (_, i) => ({
 interface StoriesListProps {
   filter: "all" | "published" | "draft"
   onFilterChange: (filter: "all" | "published" | "draft") => void
+  onClearAll: () => void
 }
 
-export function StoriesList({ filter, onFilterChange }: StoriesListProps) {
+export function StoriesList({ filter, onFilterChange, onClearAll }: StoriesListProps) {
   const [mounted, setMounted] = useState(false)
   const [hoveredStory, setHoveredStory] = useState<string | null>(null)
   const [shareMenuOpen, setShareMenuOpen] = useState<string | null>(null)
   const [storyToToggle, setStoryToToggle] = useState<Story | null>(null)
   const [stories, setStories] = useState<Story[]>(mockStories)
+  const [showClearAllDialog, setShowClearAllDialog] = useState(false)
   
   // Adicionando o estado de permissões
   const [permissions, setPermissions] = useState({
@@ -193,13 +195,13 @@ export function StoriesList({ filter, onFilterChange }: StoriesListProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {storyToToggle?.isPublished ? 'Despublicar story?' : 'Publicar story?'}
+              {storyToToggle?.isPublished ? 'Despublicar storyboard?' : 'Publicar storyboard?'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {storyToToggle?.isPublished ? (
                 <>
                   <p>
-                    Ao despublicar, seu story não ficará mais visível para os usuários do iFood.
+                    Ao despublicar, seu storyboard não ficará mais visível para os usuários do iFood.
                   </p>
                   <p className="text-muted-foreground mt-2">
                     Você pode publicá-lo novamente quando desejar.
@@ -208,7 +210,7 @@ export function StoriesList({ filter, onFilterChange }: StoriesListProps) {
               ) : (
                 <>
                   <p>
-                    Ao publicar, seu story ficará visível para todos os usuários do iFood.
+                    Ao publicar, seu storyboard ficará visível para todos os usuários do iFood.
                   </p>
                   <p className="text-muted-foreground mt-2">
                     Certifique-se de que todo o conteúdo está correto antes de prosseguir.
@@ -237,6 +239,41 @@ export function StoriesList({ filter, onFilterChange }: StoriesListProps) {
               )}
             >
               {storyToToggle?.isPublished ? 'Sim, despublicar' : 'Sim, publicar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Modal de Confirmação para Limpar Tudo */}
+      <AlertDialog 
+        open={showClearAllDialog} 
+        onOpenChange={setShowClearAllDialog}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Limpar todos os storyboards?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <p>
+                Esta ação irá remover todos os storyboards da sua lista.
+              </p>
+              <p className="text-muted-foreground mt-2">
+                Esta ação não pode ser desfeita.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                setStories([])
+                setShowClearAllDialog(false)
+                onClearAll()
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Sim, limpar tudo
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

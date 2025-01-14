@@ -1,22 +1,22 @@
 "use client"
 
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Plus } from "lucide-react"
+import { Search, Plus, Trash2 } from "lucide-react"
 import { Select } from "@/components/ui/select"
+import { CreateStoryboardModal } from "./create-storyboard-modal"
 
 interface StoriesHeaderProps {
   filter: "all" | "published" | "draft"
   onFilterChange: (filter: "all" | "published" | "draft") => void
+  onClearAll: () => void
+  hasStories: boolean
 }
 
-export function StoriesHeader({ filter, onFilterChange }: StoriesHeaderProps) {
-  const router = useRouter()
-
-  const handleCreateStory = () => {
-    router.push("/admin_stories/create")
-  }
+export function StoriesHeader({ filter, onFilterChange, onClearAll, hasStories }: StoriesHeaderProps) {
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   return (
     <header className="flex items-center justify-between w-full">
@@ -24,7 +24,7 @@ export function StoriesHeader({ filter, onFilterChange }: StoriesHeaderProps) {
         <div className="relative w-[280px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <Input 
-            placeholder="Buscar stories..." 
+            placeholder="Buscar storyboard..." 
             className="pl-10"
           />
         </div>
@@ -49,15 +49,34 @@ export function StoriesHeader({ filter, onFilterChange }: StoriesHeaderProps) {
         </Select>
       </div>
 
-      <Button 
-        size="sm" 
-        variant="default" 
-        className="gap-2"
-        onClick={handleCreateStory}
-      >
-        <Plus className="h-4 w-4" />
-        CRIAR STORIES
-      </Button>
+      <div className="flex items-center gap-3">
+        {hasStories && (
+          <Button 
+            size="sm" 
+            variant="outline"
+            className="gap-2 text-destructive hover:text-destructive-foreground hover:bg-destructive"
+            onClick={onClearAll}
+          >
+            <Trash2 className="h-4 w-4" />
+            LIMPAR TUDO
+          </Button>
+        )}
+        
+        <Button 
+          size="sm" 
+          variant="default" 
+          className="gap-2"
+          onClick={() => setShowCreateModal(true)}
+        >
+          <Plus className="h-4 w-4" />
+          CRIAR STORYBOARD
+        </Button>
+      </div>
+
+      <CreateStoryboardModal 
+        open={showCreateModal}
+        onOpenChange={setShowCreateModal}
+      />
     </header>
   )
 } 
