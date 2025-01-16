@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ImageIcon } from "lucide-react"
 import { TagsInput, type Tag } from "@/components/ui/tags-input"
+import { Switch } from "@/components/ui/switch"
 
 interface SettingsModalProps {
   open: boolean
@@ -18,6 +19,9 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const [coverImage, setCoverImage] = useState<string | null>(null)
   const [showMediaOptions, setShowMediaOptions] = useState(false)
   const [selectedTags, setSelectedTags] = useState<Tag[]>([])
+  const [schedulePost, setSchedulePost] = useState(false)
+  const [allowReactions, setAllowReactions] = useState(true)
+  const [allowSharing, setAllowSharing] = useState(true)
   const [availableTags, setAvailableTags] = useState<Tag[]>([
     { id: "1", label: "Restaurantes" },
     { id: "2", label: "Delivery" },
@@ -37,14 +41,11 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
 
   const handleSubmit = () => {
     if (!title.trim() || !coverImage) return
-    // Aqui você pode adicionar a lógica para salvar as configurações
     onOpenChange(false)
   }
 
   const handleMediaSelect = (type: 'link' | 'file' | 'library') => {
     setShowMediaOptions(false)
-    
-    // Simulando uma imagem selecionada
     setCoverImage("https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80")
   }
 
@@ -88,7 +89,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                 <div className="space-y-2 text-center">
                   <p className="text-sm font-medium text-foreground">Adicionar capa</p>
                   <p className="text-xs text-muted-foreground max-w-[240px]">
-                    Dimensões de 1080x1920 (tamanho do arquivo PNG, JPG e WebP)
+                    Dimensões de 1080×1920 (PNG, JPG e WebP)
                   </p>
                 </div>
               </button>
@@ -124,6 +125,52 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
             <p className="text-xs text-muted-foreground">
               Adicione tags para categorizar seu storyboard
             </p>
+          </div>
+
+          {/* Configurações */}
+          <div className="space-y-4">
+            <Label>Configurações</Label>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Agendar publicação</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Defina uma data e hora para publicação automática
+                  </p>
+                </div>
+                <Switch 
+                  checked={schedulePost}
+                  onCheckedChange={setSchedulePost}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Permitir reações</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Permitir que usuários reajam ao conteúdo
+                  </p>
+                </div>
+                <Switch 
+                  checked={allowReactions}
+                  onCheckedChange={setAllowReactions}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Permitir compartilhamento</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Permitir que usuários compartilhem o conteúdo
+                  </p>
+                </div>
+                <Switch 
+                  checked={allowSharing}
+                  onCheckedChange={setAllowSharing}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Botões de Ação */}

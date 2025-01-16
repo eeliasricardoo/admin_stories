@@ -4,9 +4,8 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
-import { Copy, Pencil, Trash, Eye, Share } from "lucide-react"
+import { Copy, Pencil, Trash, Eye } from "lucide-react"
 import { HLSPlayer } from "@/components/ui/hls-player"
-import { ShareMenu } from "@/components/ui/share-menu"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +16,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 interface Story {
@@ -102,182 +107,189 @@ export function StoriesList({ filter, onFilterChange, onClearAll }: StoriesListP
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-        {filteredStories.map((story) => (
-          <div 
-            key={story.id} 
-            className="group relative flex flex-col rounded-xl border bg-card/50 backdrop-blur-sm overflow-hidden transition-all duration-300 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
-            onMouseEnter={() => setHoveredStory(story.id)}
-            onMouseLeave={() => setHoveredStory(null)}
-          >
-            <div className="relative aspect-[3/4] bg-muted overflow-hidden">
-              {hoveredStory === story.id && story.videoUrl ? (
-                <HLSPlayer
-                  src={story.videoUrl}
-                  poster={story.image}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              ) : (
-                <Image
-                  src={story.image}
-                  alt={story.title}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  sizes="(max-width: 768px) 33vw, (max-width: 1200px) 20vw, 16vw"
-                  priority={story.id === "1"}
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+    <TooltipProvider>
+      <div className="space-y-6">
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          {filteredStories.map((story) => (
+            <div 
+              key={story.id} 
+              className="group relative flex flex-col rounded-xl border bg-card/50 backdrop-blur-sm overflow-visible transition-all duration-300 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
+              onMouseEnter={() => setHoveredStory(story.id)}
+              onMouseLeave={() => setHoveredStory(null)}
+            >
+              <div className="relative aspect-[3/4] bg-muted overflow-hidden">
+                {hoveredStory === story.id && story.videoUrl ? (
+                  <HLSPlayer
+                    src={story.videoUrl}
+                    poster={story.image}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                ) : (
+                  <Image
+                    src={story.image}
+                    alt={story.title}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    sizes="(max-width: 768px) 33vw, (max-width: 1200px) 20vw, 16vw"
+                    priority={story.id === "1"}
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                
+                <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                  <h3 className="font-medium text-sm leading-tight line-clamp-2 mb-2">
+                    {story.title}
+                  </h3>
+                  <div className="flex items-center gap-2 text-xs text-white/90">
+                    <Eye className="h-4 w-4" />
+                    <span suppressHydrationWarning>
+                      {mounted ? formatNumber(story.views || 0) : '0'}
+                    </span>
+                  </div>
+                </div>
+              </div>
               
-              <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                <h3 className="font-medium text-sm leading-tight line-clamp-2 mb-2">
-                  {story.title}
-                </h3>
-                <div className="flex items-center gap-2 text-xs text-white/90">
-                  <Eye className="h-4 w-4" />
-                  <span suppressHydrationWarning>
-                    {mounted ? formatNumber(story.views || 0) : '0'}
-                  </span>
+              <div className="flex items-center justify-between p-2.5 gap-2 overflow-visible">
+                <div className="flex items-center gap-1">
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="h-8 w-8 opacity-60 hover:opacity-100 transition-opacity"
+                    title="Duplicar"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="h-8 w-8 opacity-60 hover:opacity-100 transition-opacity"
+                    title="Editar"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="h-8 w-8 opacity-60 hover:opacity-100 hover:text-destructive transition-all"
+                    title="Excluir"
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="relative z-50">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center">
+                        <Switch
+                          checked={story.isPublished}
+                          onCheckedChange={() => handleTogglePublish(story)}
+                          className="data-[state=checked]:bg-green-500/90"
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" sideOffset={5} className="z-[60]">
+                      {story.isPublished ? 'Publicado' : 'Despublicado'}
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             </div>
-            
-            <div className="flex items-center justify-between p-2.5 gap-2">
-              <div className="flex items-center gap-1">
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  className="h-8 w-8 opacity-60 hover:opacity-100 transition-opacity"
-                  title="Duplicar"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  className="h-8 w-8 opacity-60 hover:opacity-100 transition-opacity"
-                  title="Editar"
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  className="h-8 w-8 opacity-60 hover:opacity-100 hover:text-destructive transition-all"
-                  title="Excluir"
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted/50">
-                  {story.isPublished ? 'Publicado' : 'Despublicar'}
-                </span>
-                <Switch
-                  checked={story.isPublished}
-                  onCheckedChange={() => handleTogglePublish(story)}
-                  aria-label="Toggle publish"
-                  className="data-[state=checked]:bg-green-500/90 scale-75"
-                />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {/* Modal de Confirmação */}
-      <AlertDialog 
-        open={!!storyToToggle} 
-        onOpenChange={() => setStoryToToggle(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {storyToToggle?.isPublished ? 'Despublicar storyboard?' : 'Publicar storyboard?'}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {storyToToggle?.isPublished ? (
-                <>
-                  <p>
-                    Ao despublicar, seu storyboard não ficará mais visível para os usuários do iFood.
-                  </p>
-                  <p className="text-muted-foreground mt-2">
-                    Você pode publicá-lo novamente quando desejar.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p>
-                    Ao publicar, seu storyboard ficará visível para todos os usuários do iFood.
-                  </p>
-                  <p className="text-muted-foreground mt-2">
-                    Certifique-se de que todo o conteúdo está correto antes de prosseguir.
-                  </p>
-                </>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => {
-                setStories(currentStories => 
-                  currentStories.map(story => 
-                    story.id === storyToToggle?.id 
-                      ? { ...story, isPublished: !story.isPublished }
-                      : story
+        {/* Modal de Confirmação */}
+        <AlertDialog 
+          open={!!storyToToggle} 
+          onOpenChange={() => setStoryToToggle(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {storyToToggle?.isPublished ? 'Despublicar storyboard?' : 'Publicar storyboard?'}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {storyToToggle?.isPublished ? (
+                  <>
+                    <p>
+                      Ao despublicar, seu storyboard não ficará mais visível para os usuários do iFood.
+                    </p>
+                    <p className="text-muted-foreground mt-2">
+                      Você pode publicá-lo novamente quando desejar.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>
+                      Ao publicar, seu storyboard ficará visível para todos os usuários do iFood.
+                    </p>
+                    <p className="text-muted-foreground mt-2">
+                      Certifique-se de que todo o conteúdo está correto antes de prosseguir.
+                    </p>
+                  </>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={() => {
+                  setStories(currentStories => 
+                    currentStories.map(story => 
+                      story.id === storyToToggle?.id 
+                        ? { ...story, isPublished: !story.isPublished }
+                        : story
+                    )
                   )
-                )
-                setStoryToToggle(null)
-              }}
-              className={cn(
-                storyToToggle?.isPublished
-                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  : "bg-primary text-primary-foreground hover:bg-primary/90"
-              )}
-            >
-              {storyToToggle?.isPublished ? 'Sim, despublicar' : 'Sim, publicar'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+                  setStoryToToggle(null)
+                }}
+                className={cn(
+                  storyToToggle?.isPublished
+                    ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90"
+                )}
+              >
+                {storyToToggle?.isPublished ? 'Sim, despublicar' : 'Sim, publicar'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
-      {/* Modal de Confirmação para Limpar Tudo */}
-      <AlertDialog 
-        open={showClearAllDialog} 
-        onOpenChange={setShowClearAllDialog}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Limpar todos os storyboards?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              <p>
-                Esta ação irá remover todos os storyboards da sua lista.
-              </p>
-              <p className="text-muted-foreground mt-2">
-                Esta ação não pode ser desfeita.
-              </p>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => {
-                setStories([])
-                setShowClearAllDialog(false)
-                onClearAll()
-              }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Sim, limpar tudo
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+        {/* Modal de Confirmação para Limpar Tudo */}
+        <AlertDialog 
+          open={showClearAllDialog} 
+          onOpenChange={setShowClearAllDialog}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Limpar todos os storyboards?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                <p>
+                  Esta ação irá remover todos os storyboards da sua lista.
+                </p>
+                <p className="text-muted-foreground mt-2">
+                  Esta ação não pode ser desfeita.
+                </p>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={() => {
+                  setStories([])
+                  setShowClearAllDialog(false)
+                  onClearAll()
+                }}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Sim, limpar tudo
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </TooltipProvider>
   )
 } 

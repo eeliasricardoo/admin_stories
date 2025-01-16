@@ -30,18 +30,18 @@ export function Navbar({ onSaveAsDraft, onPublish }: NavbarProps) {
           <Button 
             variant="outline" 
             size="sm"
-            className="font-medium text-base"
+            className="gap-2"
             onClick={onSaveAsDraft}
           >
-            Salvar como rascunho
+            SALVAR COMO RASCUNHO
           </Button>
 
           <Button 
             size="sm"
-            className="font-medium text-base"
+            className="gap-2"
             onClick={onPublish}
           >
-            Publicar
+            PUBLICAR
           </Button>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useState, useContext } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Select } from "@/components/ui/select"
@@ -44,7 +45,7 @@ interface Story {
     type: 'link'
     url: string
   }
-  cta?: {
+  cta: {
     enabled: boolean
     label: string
     url: string
@@ -319,133 +320,76 @@ function CreateStoryContent() {
                 </div>
               </div>
 
-              {/* Schedule */}
+              {/* Link externo (CTA) */}
               <div className="space-y-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">Agendar publicação</h3>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Agende a data e hora que você deseja publicar
-                    </p>
-                  </div>
-                  <Switch className="mt-1" checked={schedulePost} onCheckedChange={setSchedulePost} />
-                </div>
-
-                {schedulePost && (
-                  <div className="space-y-4">
-                    <Input type="date" className="text-base" />
-                    <Input type="time" className="text-base" />
-                  </div>
-                )}
-              </div>
-
-              {/* Interactions */}
-              <div className="space-y-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">Permitir reação</h3>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Permitir que usuários reajam aos stories
-                    </p>
-                  </div>
-                  <Switch 
-                    className="mt-1" 
-                    checked={permissions.allowReactions}
-                    onCheckedChange={(checked) => 
-                      setPermissions(prev => ({ ...prev, allowReactions: checked }))
-                    }
-                  />
-                </div>
-
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">Permitir compartilhamento</h3>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Permitir que usuários compartilhem os stories
-                    </p>
-                  </div>
-                  <Switch 
-                    className="mt-1"
-                    checked={permissions.allowSharing}
-                    onCheckedChange={(checked) => 
-                      setPermissions(prev => ({ ...prev, allowSharing: checked }))
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="flex items-start justify-between">
+                <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-base font-semibold text-foreground">Link externo (CTA)</h3>
                     <p className="text-sm text-muted-foreground mt-2">
-                      Configure as informações de segurança do agente
+                      Configure as informações de redirecionamento
                     </p>
                   </div>
                   <Switch 
-                    className="mt-1"
                     checked={activeStory?.cta?.enabled}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(enabled) => {
                       setStories(prev => prev.map(story => 
                         story.id === activeStoryId 
                           ? { 
                               ...story, 
                               cta: { 
-                                ...story.cta!, 
-                                enabled: checked 
+                                ...story.cta,
+                                enabled 
                               } 
                             }
                           : story
                       ))
-                    }
+                    }}
                   />
                 </div>
 
                 {activeStory?.cta?.enabled && (
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm text-muted-foreground mb-2 block">
-                        Título do botão
-                      </label>
+                      <Label>Texto do botão</Label>
                       <Input 
-                        value={activeStory.cta.label}
-                        onChange={(e) => 
+                        placeholder="Ex: Acessar agora"
+                        value={activeStory?.cta?.label || ""}
+                        onChange={(e) => {
+                          const value = e.target.value
                           setStories(prev => prev.map(story => 
                             story.id === activeStoryId 
                               ? { 
                                   ...story, 
                                   cta: { 
-                                    ...story.cta!, 
-                                    label: e.target.value 
+                                    ...story.cta,
+                                    label: value 
                                   } 
                                 }
                               : story
                           ))
-                        }
-                        placeholder="Ex: Acessar agora"
+                        }}
                       />
                     </div>
 
                     <div>
-                      <label className="text-sm text-muted-foreground mb-2 block">
-                        Link
-                      </label>
+                      <Label>URL de destino</Label>
                       <Input 
-                        value={activeStory.cta.url}
-                        onChange={(e) => 
+                        placeholder="Ex: https://ifood.com.br/promocao"
+                        value={activeStory?.cta?.url || ""}
+                        onChange={(e) => {
+                          const value = e.target.value
                           setStories(prev => prev.map(story => 
                             story.id === activeStoryId 
                               ? { 
                                   ...story, 
                                   cta: { 
-                                    ...story.cta!, 
-                                    url: e.target.value 
+                                    ...story.cta,
+                                    url: value 
                                   } 
                                 }
                               : story
                           ))
-                        }
-                        placeholder="https://"
+                        }}
                       />
                     </div>
                   </div>
@@ -490,11 +434,15 @@ function CreateStoryContent() {
                               </div>
                             </div>
                             
-                            <div className="space-y-2 text-center">
+                            <div className="space-y-2 text-center max-w-[280px] mx-auto">
                               <p className="text-sm font-medium text-zinc-900">Adicionar mídia</p>
-                              <p className="text-xs text-zinc-500 max-w-[240px]">
-                                Dimensões de 1080x1920 (tamanho do arquivo PNG, JPG e WebP)
-                              </p>
+                              <div className="space-y-1 text-xs text-zinc-500">
+                                <p>Dimensões de 1080×1920</p>
+                                <p>Imagens: PNG, JPG e WebP</p>
+                                <p>Vídeos: MP4 e MOV</p>
+                                <p>Duração máxima: 3 minutos</p>
+                                <p>Tamanho máximo: 4 GB</p>
+                              </div>
                             </div>
                           </button>
 
